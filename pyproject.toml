@@ -1,0 +1,26 @@
+[project]
+name = "desi-data-explorer"
+version = "0.1.0"
+description = "Tutorial demonstration for accessing and visualizing DESI DR1 galaxy data"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.21.0",
+    "matplotlib>=3.5.0",
+    "astropy>=5.0.0",
+    "astroquery>=0.4.6",
+    "pandas>=1.5.0",
+    "scipy>=1.9.0",
+    "tqdm>=4.64.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/marcelo-alvarez/desi-data-explorer"
+Repository = "https://github.com/marcelo-alvarez/desi-data-explorer"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = []
