@@ -33,23 +33,28 @@ Creating a tutorial demonstration repository for accessing and visualizing DESI 
    - Calculate optimal projection plane for minimal angular spread
    - Generate orthographic projection with redshift color mapping
    - Test and get user approval for wedge figure
+   - **COMMIT AND PUSH** wedge visualization to remote
 2. **Secondary Priority**: Develop emission line analysis
    - Create examples/sfr_emission_plots.py
    - Implement Halpha vs SFR density scatter plots
    - Add OII vs SFR visualization with proper redshift ranges
    - Get user approval for both emission line figures
+   - **COMMIT AND PUSH** emission line analysis to remote
 3. **Documentation Phase**: 
    - Write comprehensive README.md with installation/usage instructions
    - Add inline code comments and documentation
    - Final testing in fresh environment
-4. **Deployment**: Push to GitHub at target URL
+   - **COMMIT AND PUSH** documentation updates to remote
+4. **Deployment**: Ensure all changes pushed to GitHub at target URL
 
 ## Technical Notes for Next Session
 - Data access module uses NOIRLab TAP service with proven query patterns
 - Target 50,000 galaxies with full redshift coverage (0 < z < 1.5)
 - All visualizations should use matplotlib with scientific styling
 - Each figure requires explicit user approval before proceeding
+- **CRITICAL**: Commit AND push to remote after each major milestone
 - Maintain frequent commits with descriptive messages
+- Remote repository target: https://github.com/marcelo-alvarez/desi-data-explorer
 
 ## Important Notes
 - Emphasis on using actual DESI data throughout (no fallbacks)
