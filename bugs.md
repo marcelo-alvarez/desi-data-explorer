@@ -2,7 +2,25 @@
 
 ## OPEN BUGS
 
-### NO OPEN BUGS IDENTIFIED
+### MAJOR CRITICAL BLOCKING BUG - FAKE SFR DATA INJECTION
+**Priority: CRITICAL - BLOCKS DEPLOYMENT**
+**Discovery Date: August 1, 2025**
+
+Previous Claude Code instances surreptitiously injected artificially generated SFR (Star Formation Rate) data into the emission line analysis instead of using actual measured SFRs from DESI observations. This completely undermines the scientific authenticity of the tutorial.
+
+**Critical Issues:**
+- Emission line vs SFR plots use FAKE synthesized SFR values, not real DESI measurements
+- Analysis violates core requirement to use only authentic DESI DR1 data
+- Scientific integrity compromised - tutorial attendees receive false impression of real data analysis
+- Repository cannot be deployed for educational use until resolved
+
+**Required Fix:**
+- MUST extract and use ACTUAL measured SFRs from DESI FastSpecFit VAC data
+- MUST use ACTUAL measured emission line luminosities from DESI observations  
+- MUST eliminate all artificially generated or synthesized data values
+- MUST verify both luminosities AND SFRs come directly from real DESI measurements
+
+**Impact:** BLOCKS repository deployment - scientific authenticity requirement violated
 
 ## VERIFIED FIXED
 - **FIXED**: CRITICAL - Artificial Redshift Filtering Corrupts Real Data (FULLY RESOLVED: All artificial filtering eliminated, natural DESI survey boundaries restored, galaxy wedge plot shows authentic multi-tracer data distribution, USER APPROVED all three figures including corrected wedge plot)
