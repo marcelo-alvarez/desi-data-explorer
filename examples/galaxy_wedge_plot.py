@@ -81,7 +81,7 @@ def calculate_optimal_projection(ra, dec, z):
     t2_y = center_z * t1_x - center_x * t1_z
     t2_z = center_x * t1_y - center_y * t1_x
     
-    # Project points onto tangent plane
+    # Project points onto tangent plane (angular coordinates scaled by redshift)
     x_proj = (x * t1_x + y * t1_y + z_cart * t1_z) * z
     y_proj = (x * t2_x + y * t2_y + z_cart * t2_z) * z
     
@@ -125,8 +125,8 @@ def create_wedge_plot(galaxies, output_path):
     ax.set_aspect('equal')
     
     # Styling
-    ax.set_xlabel('Projected X Coordinate [h⁻¹ Mpc]', fontsize=14)
-    ax.set_ylabel('Projected Y Coordinate [h⁻¹ Mpc]', fontsize=14)
+    ax.set_xlabel('Projected X Coordinate [redshift × angular]', fontsize=14)
+    ax.set_ylabel('Projected Y Coordinate [redshift × angular]', fontsize=14)
     ax.set_title('DESI DR1 Galaxy Distribution: 2D Wedge Projection\n' + 
                 f'{len(galaxies):,} Main Survey Galaxies', fontsize=16, pad=20)
     

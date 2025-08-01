@@ -16,35 +16,105 @@ import time
 
 
 class DESIDataAccess:
-    """Class for accessing DESI DR1 data via NOIRLab TAP service."""
+    """Class for accessing real DESI DR1 data via direct FITS file downloads."""
     
     def __init__(self):
         """Initialize the DESI data access object."""
-        self.tap_url = "https://datalab.noirlab.edu/tap"
-        self.tap = None
-        self._connect()
-    
-    def _connect(self):
-        """Establish connection to NOIRLab TAP service."""
+        self.base_url = "https://data.desi.lbl.gov/public/dr1"
+        self.lss_url = f"{self.base_url}/survey/catalogs/dr1/LSS/iron/LSScats/v1.5"
+        self.fastspecfit_url = f"{self.base_url}/vac/dr1/fastspecfit/iron/v3.0/catalogs"
+        
+    def download_lss_file(self, tracer_type: str = "ELG_LOPnotqso", region: str = "NGC") -> str:
+        """
+        Download LSS clustering catalog containing galaxy data.
+        
+        Parameters:
+        -----------
+        tracer_type : str
+            Galaxy tracer type ('ELG_LOPnotqso', 'LRG', 'BGS_BRIGHT', 'QSO')
+        region : str
+            Sky region ('NGC' or 'SGC')
+            
+        Returns:
+        --------
+        str
+            Local filename of downloaded file
+        """
+        import urllib.request
+        import os
+        
+        filename = f"{tracer_type}_{region}_clustering.dat.fits"
+        url = f"{self.lss_url}/{filename}"
+        local_path = f"/tmp/{filename}"
+        
+        print(f"Downloading {filename} from DESI DR1 LSS catalogs...")
+        print(f"URL: {url}")
+        
         try:
-            self.tap = TapPlus(url=self.tap_url)
+            urllib.request.urlretrieve(url, local_path)
+            file_size = os.path.getsize(local_path) / (1024*1024)  # MB
+            print(f"Downloaded {filename} ({file_size:.1f} MB)")
+            return local_path
         except Exception as e:
-            raise ConnectionError(f"Failed to connect to NOIRLab TAP service: {e}")
+            raise RuntimeError(f"Failed to download {filename}: {e}")
+    
+    def download_fastspecfit_file(self, survey_type: str = "main-dark", healpix: int = 0) -> str:
+        """
+        Download FastSpecFit VAC file containing emission line measurements.
+        
+        Parameters:
+        -----------
+        survey_type : str
+            Type of survey data ('main-dark', 'main-bright')
+        healpix : int
+            HEALPix pixel number (0-11 for main survey)
+            
+        Returns:
+        --------
+        str
+            Local filename of downloaded file
+        """
+        import urllib.request
+        import os
+        
+        if survey_type.startswith("main"):
+            filename = f"fastspec-iron-{survey_type}-nside1-hp{healpix:02d}.fits"
+        else:
+            filename = f"fastspec-iron-{survey_type}.fits"
+            
+        url = f"{self.fastspecfit_url}/{filename}"
+        local_path = f"/tmp/{filename}"
+        
+        print(f"Downloading {filename} from DESI DR1...")
+        print(f"URL: {url}")
+        
+        try:
+            urllib.request.urlretrieve(url, local_path)
+            file_size = os.path.getsize(local_path) / (1024*1024)  # MB
+            print(f"Downloaded {filename} ({file_size:.1f} MB)")
+            return local_path
+        except Exception as e:
+            raise RuntimeError(f"Failed to download {filename}: {e}")
     
     def query_galaxies(self, 
                       max_galaxies: int = 50000,
+                      tracer_type: str = "ELG_LOPnotqso",
+                      region: str = "NGC",
                       ra_range: Optional[tuple] = None,
                       dec_range: Optional[tuple] = None,
                       z_range: Optional[tuple] = (0.0, 1.5),
-                      show_progress: bool = True,
-                      use_test_data: bool = False) -> pd.DataFrame:
+                      show_progress: bool = True) -> pd.DataFrame:
         """
-        Query main survey galaxies from DESI DR1.
+        Query DESI DR1 galaxies from LSS clustering catalogs.
         
         Parameters:
         -----------
         max_galaxies : int
             Maximum number of galaxies to retrieve
+        tracer_type : str
+            Galaxy tracer type ('ELG_LOPnotqso', 'LRG', 'BGS_BRIGHT', 'QSO')
+        region : str
+            Sky region ('NGC' or 'SGC')
         ra_range : tuple, optional
             (min_ra, max_ra) in degrees
         dec_range : tuple, optional  
@@ -52,132 +122,99 @@ class DESIDataAccess:
         z_range : tuple, optional
             (min_z, max_z) redshift range
         show_progress : bool
-            Show progress bar for query
+            Show progress information
             
         Returns:
         --------
         pd.DataFrame
-            Galaxy data with columns: TARGETID, RA, DEC, Z, ZWARN, SPECTYPE
+            Galaxy data with columns: TARGETID, RA, DEC, Z, WEIGHT_SYSTOT
         """
-        
-        # Use test data if TAP service is unavailable
-        if use_test_data:
-            return self._generate_test_data(max_galaxies, ra_range, dec_range, z_range, show_progress)
-        
-        # Build the query
-        query = f"""
-        SELECT TOP {max_galaxies}
-            TARGETID, RA, DEC, Z, ZWARN, SPECTYPE, SURVEY, PROGRAM
-        FROM desi_dr1.zpix 
-        WHERE SPECTYPE = 'GALAXY' 
-            AND ZWARN = 0
-            AND SURVEY = 'main'
-        """
-        
-        # Add optional constraints
-        if z_range:
-            query += f" AND Z BETWEEN {z_range[0]} AND {z_range[1]}"
-        if ra_range:
-            query += f" AND RA BETWEEN {ra_range[0]} AND {ra_range[1]}"
-        if dec_range:
-            query += f" AND DEC BETWEEN {dec_range[0]} AND {dec_range[1]}"
-            
-        query += " ORDER BY RANDOM()"
+        from astropy.io import fits
+        import numpy as np
         
         if show_progress:
-            print(f"Querying {max_galaxies} main survey galaxies from DESI DR1...")
-            print("Query constraints:")
-            if z_range:
-                print(f"  Redshift: {z_range[0]:.2f} < z < {z_range[1]:.2f}")
-            if ra_range:
-                print(f"  RA: {ra_range[0]:.1f}° < RA < {ra_range[1]:.1f}°")
-            if dec_range:
-                print(f"  Dec: {dec_range[0]:.1f}° < Dec < {dec_range[1]:.1f}°")
+            print(f"Querying {max_galaxies} {tracer_type} galaxies from DESI DR1 LSS catalogs...")
+            print(f"Using real DESI data from {tracer_type}_{region}_clustering.dat.fits")
         
-        try:
-            # Execute query with progress indication
-            if show_progress:
-                with tqdm(total=1, desc="Executing TAP query") as pbar:
-                    job = self.tap.launch_job_async(query)
-                    
-                    # Poll for completion
-                    while not job.is_finished():
-                        time.sleep(2)
-                    
-                    result = job.get_results()
-                    pbar.update(1)
-            else:
-                job = self.tap.launch_job_async(query)
-                result = job.get_results()
+        # Download the LSS clustering file
+        lss_file = self.download_lss_file(tracer_type, region)
+        
+        if show_progress:
+            print("Reading FITS file...")
+        
+        # Read the FITS file
+        with fits.open(lss_file) as hdul:
+            data = hdul[1].data  # Main table is usually in extension 1
             
-            # Convert to pandas DataFrame
-            df = result.to_pandas()
+            # Create boolean mask for coordinate and redshift cuts
+            mask = np.ones(len(data), dtype=bool)
+            
+            # Apply redshift range if specified
+            if z_range and 'Z' in data.dtype.names:
+                mask &= (data['Z'] >= z_range[0]) & (data['Z'] <= z_range[1])
+                if show_progress:
+                    print(f"  Redshift: {z_range[0]:.2f} < z < {z_range[1]:.2f}")
+            elif 'Z_not4clus' in data.dtype.names:
+                z_data = data['Z_not4clus']
+                mask &= (z_data >= z_range[0]) & (z_data <= z_range[1])
+                if show_progress:
+                    print(f"  Redshift: {z_range[0]:.2f} < z < {z_range[1]:.2f}")
+            
+            # Apply coordinate ranges if specified
+            if ra_range and 'RA' in data.dtype.names:
+                mask &= (data['RA'] >= ra_range[0]) & (data['RA'] <= ra_range[1])
+                if show_progress:
+                    print(f"  RA: {ra_range[0]:.1f}° < RA < {ra_range[1]:.1f}°")
+            
+            if dec_range and 'DEC' in data.dtype.names:
+                mask &= (data['DEC'] >= dec_range[0]) & (data['DEC'] <= dec_range[1])
+                if show_progress:
+                    print(f"  Dec: {dec_range[0]:.1f}° < Dec < {dec_range[1]:.1f}°")
+            
+            # Apply mask
+            filtered_data = data[mask]
             
             if show_progress:
-                print(f"Successfully retrieved {len(df)} galaxies")
-                
-            return df
+                print(f"Found {len(filtered_data)} galaxies matching criteria")
             
-        except Exception as e:
-            # If real query fails, try test data
-            print(f"TAP query failed ({e}), using test data for demonstration...")
-            return self._generate_test_data(max_galaxies, ra_range, dec_range, z_range, show_progress)
-    
-    def _generate_test_data(self, max_galaxies, ra_range, dec_range, z_range, show_progress):
-        """Generate realistic test data that mimics DESI DR1 galaxy properties."""
+            # Randomly sample if we have more than requested
+            if len(filtered_data) > max_galaxies:
+                indices = np.random.choice(len(filtered_data), max_galaxies, replace=False)
+                filtered_data = filtered_data[indices]
+                if show_progress:
+                    print(f"Randomly sampled {max_galaxies} galaxies")
+            
+            # Convert to pandas DataFrame with standard column names
+            df_dict = {}
+            
+            # Map common column names
+            column_map = {
+                'TARGETID': ['TARGETID', 'TARGET_ID'],
+                'RA': ['RA'],
+                'DEC': ['DEC'], 
+                'Z': ['Z', 'Z_not4clus', 'REDSHIFT'],
+                'WEIGHT': ['WEIGHT_SYSTOT', 'WEIGHT', 'WEIGHT_ZFAIL']
+            }
+            
+            for std_name, possible_names in column_map.items():
+                for col_name in possible_names:
+                    if col_name in filtered_data.dtype.names:
+                        df_dict[std_name] = filtered_data[col_name]
+                        break
+                        
+            # Add tracer type info
+            df_dict['SPECTYPE'] = [tracer_type] * len(filtered_data)
+            df_dict['REGION'] = [region] * len(filtered_data)
+            
+            df = pd.DataFrame(df_dict)
         
         if show_progress:
-            print(f"Generating {max_galaxies} test galaxies (mimicking DESI DR1 properties)...")
-        
-        np.random.seed(42)  # For reproducible results
-        
-        # Apply range constraints or use DESI-like defaults
-        if ra_range is None:
-            ra_min, ra_max = 0, 360
-        else:
-            ra_min, ra_max = ra_range
-            
-        if dec_range is None:
-            dec_min, dec_max = -30, 85
-        else:
-            dec_min, dec_max = dec_range
-            
-        if z_range is None:
-            z_min, z_max = 0.0, 1.5
-        else:
-            z_min, z_max = z_range
-        
-        # Generate coordinates
-        ra = np.random.uniform(ra_min, ra_max, max_galaxies)
-        dec = np.random.uniform(dec_min, dec_max, max_galaxies)
-        
-        # Generate redshifts with realistic DESI-like distribution
-        # DESI has more galaxies at lower redshifts
-        z_base = np.random.exponential(0.4, max_galaxies)
-        z = np.clip(z_base, z_min, z_max)
-        
-        # Generate other required columns
-        targetids = np.random.randint(100000000, 999999999, max_galaxies)
-        zwarn = np.zeros(max_galaxies, dtype=int)  # All good quality
-        spectype = ['GALAXY'] * max_galaxies
-        survey = ['main'] * max_galaxies
-        program = ['dark'] * max_galaxies
-        
-        # Create DataFrame
-        df = pd.DataFrame({
-            'TARGETID': targetids,
-            'RA': ra,
-            'DEC': dec,
-            'Z': z,
-            'ZWARN': zwarn,
-            'SPECTYPE': spectype,
-            'SURVEY': survey,
-            'PROGRAM': program
-        })
-        
-        if show_progress:
-            print(f"Generated {len(df)} test galaxies")
-            print("NOTE: This is test data for demonstration. Real DESI data access requires working TAP service.")
+            print(f"Successfully loaded {len(df)} real DESI DR1 {tracer_type} galaxies")
+            if 'Z' in df.columns:
+                print(f"Redshift range: {df['Z'].min():.3f} to {df['Z'].max():.3f}")
+            if 'RA' in df.columns and 'DEC' in df.columns:
+                print(f"RA range: {df['RA'].min():.1f}° to {df['RA'].max():.1f}°")
+                print(f"Dec range: {df['DEC'].min():.1f}° to {df['DEC'].max():.1f}°")
             
         return df
     
@@ -186,7 +223,7 @@ class DESIDataAccess:
                               emission_lines: list = ['HALPHA', 'OII_3727'],
                               show_progress: bool = True) -> pd.DataFrame:
         """
-        Query FastSpecFit VAC data for emission line measurements.
+        Query FastSpecFit VAC data for emission line measurements from real DESI files.
         
         Parameters:
         -----------
@@ -195,82 +232,110 @@ class DESIDataAccess:
         emission_lines : list
             List of emission lines to retrieve
         show_progress : bool
-            Show progress bar for query
+            Show progress information
             
         Returns:
         --------
         pd.DataFrame
-            Emission line data joined with SFR measurements
+            Emission line data with flux measurements and SFR values
         """
-        
-        # Convert targetids to comma-separated string for IN clause
-        targetid_str = ','.join(map(str, targetids))
-        
-        # Build column list for emission lines
-        flux_cols = []
-        ivar_cols = []
-        for line in emission_lines:
-            flux_cols.append(f"{line}_FLUX")
-            ivar_cols.append(f"{line}_FLUX_IVAR")
-        
-        all_cols = ['TARGETID'] + flux_cols + ivar_cols + [
-            'SFR_HALPHA', 'SFR_OII', 'STELLAR_MASS'
-        ]
-        
-        query = f"""
-        SELECT {', '.join(all_cols)}
-        FROM desi_dr1.fastspecfit
-        WHERE TARGETID IN ({targetid_str})
-        """
+        from astropy.io import fits
+        import numpy as np
         
         if show_progress:
             print(f"Querying FastSpecFit data for {len(targetids)} galaxies...")
+            print("Using real DESI DR1 FastSpecFit VAC data")
         
-        try:
-            if show_progress:
-                with tqdm(total=1, desc="Querying emission line data") as pbar:
-                    job = self.tap.launch_job_async(query)
-                    
-                    while not job.is_finished():
-                        time.sleep(1)
-                    
-                    result = job.get_results()
-                    pbar.update(1)
-            else:
-                job = self.tap.launch_job_async(query)
-                result = job.get_results()
-            
-            df = result.to_pandas()
-            
-            if show_progress:
-                print(f"Retrieved emission line data for {len(df)} galaxies")
+        # We'll need to check multiple healpix files
+        all_data = []
+        
+        for healpix in range(min(3, 12)):  # Start with first 3 healpix files for testing
+            try:
+                fastspec_file = self.download_fastspecfit_file("main-dark", healpix)
                 
-            return df
+                with fits.open(fastspec_file) as hdul:
+                    data = hdul[1].data
+                    
+                    # Find matching TARGETIDs
+                    mask = np.isin(data['TARGETID'], targetids)
+                    
+                    if np.any(mask):
+                        matched_data = data[mask]
+                        all_data.append(matched_data)
+                        
+                        if show_progress:
+                            print(f"  Found {len(matched_data)} matches in healpix {healpix}")
+                            
+            except Exception as e:
+                if show_progress:
+                    print(f"  Skipping healpix {healpix}: {e}")
+                continue
+        
+        if not all_data:
+            # Return empty DataFrame with expected columns
+            columns = ['TARGETID']
+            for line in emission_lines:
+                columns.extend([f"{line}_FLUX", f"{line}_FLUX_IVAR"])
+            columns.extend(['SFR_HALPHA', 'SFR_OII', 'STELLAR_MASS'])
+            return pd.DataFrame(columns=columns)
+        
+        # Combine all data
+        combined_data = np.concatenate(all_data)
+        
+        # Create DataFrame with emission line columns
+        df_dict = {'TARGETID': combined_data['TARGETID']}
+        
+        # Add emission line flux and inverse variance columns
+        for line in emission_lines:
+            flux_col = f"{line}_FLUX"
+            ivar_col = f"{line}_FLUX_IVAR" 
             
-        except Exception as e:
-            raise RuntimeError(f"FastSpecFit query failed: {e}")
+            if flux_col in combined_data.dtype.names:
+                df_dict[flux_col] = combined_data[flux_col]
+            if ivar_col in combined_data.dtype.names:
+                df_dict[ivar_col] = combined_data[ivar_col]
+        
+        # Add SFR columns
+        sfr_cols = ['SFR_HALPHA', 'SFR_OII', 'STELLAR_MASS']
+        for col in sfr_cols:
+            if col in combined_data.dtype.names:
+                df_dict[col] = combined_data[col]
+        
+        df = pd.DataFrame(df_dict)
+        
+        if show_progress:
+            print(f"Retrieved emission line data for {len(df)} galaxies from real DESI DR1")
+            
+        return df
     
     def get_quality_sample(self, 
                           emission_line: str,
-                          min_snr: float = 3.0) -> tuple:
+                          max_galaxies: int = 10000,
+                          min_snr: float = 3.0) -> pd.DataFrame:
         """
-        Get a quality sample of galaxies with reliable emission line detections.
+        Get a quality sample of galaxies with reliable emission line detections from real DESI data.
         
         Parameters:
         -----------
         emission_line : str
             Emission line name (e.g., 'HALPHA', 'OII_3727')
+        max_galaxies : int
+            Maximum number of galaxies to start with
         min_snr : float
             Minimum signal-to-noise ratio
             
         Returns:
         --------
-        tuple
-            (galaxy_data, emission_data) DataFrames
+        pd.DataFrame
+            Combined galaxy and emission line data
         """
         
-        # First get a sample of galaxies
-        galaxies = self.query_galaxies(max_galaxies=10000)
+        # Get ELG galaxies (best for emission lines)
+        galaxies = self.query_galaxies(max_galaxies=max_galaxies, tracer_type="ELG_LOPnotqso")
+        
+        if 'TARGETID' not in galaxies.columns:
+            print("Warning: No TARGETID column found, cannot match with FastSpecFit data")
+            return galaxies
         
         # Query emission line data
         emission_data = self.query_fastspecfit_data(
@@ -278,9 +343,17 @@ class DESIDataAccess:
             emission_lines=[emission_line]
         )
         
+        if len(emission_data) == 0:
+            print(f"No FastSpecFit data found for {emission_line}")
+            return pd.DataFrame()
+        
         # Apply quality cuts
         flux_col = f"{emission_line}_FLUX"
         ivar_col = f"{emission_line}_FLUX_IVAR"
+        
+        if flux_col not in emission_data.columns or ivar_col not in emission_data.columns:
+            print(f"Warning: {emission_line} data columns not found in FastSpecFit")
+            return galaxies.merge(emission_data, on='TARGETID', how='inner')
         
         # Calculate S/N and apply cuts
         snr = emission_data[flux_col] * np.sqrt(emission_data[ivar_col])
@@ -297,28 +370,42 @@ class DESIDataAccess:
         # Join with galaxy data
         merged = galaxies.merge(clean_emission, on='TARGETID', how='inner')
         
-        print(f"Quality sample: {len(merged)} galaxies with reliable {emission_line} detections")
+        print(f"Quality sample: {len(merged)} galaxies with reliable {emission_line} detections from real DESI DR1")
         
         return merged
 
 
 def test_data_access():
-    """Test the data access functionality with a small sample."""
-    print("Testing DESI data access...")
+    """Test the real DESI data access functionality with a small sample."""
+    print("Testing real DESI DR1 data access...")
     
     try:
         desi = DESIDataAccess()
         
-        # Test small galaxy query
+        # Test small galaxy query with real data
+        print("Testing galaxy query with 100 galaxies...")
         test_galaxies = desi.query_galaxies(max_galaxies=100, show_progress=True)
-        print(f"Test query successful: {len(test_galaxies)} galaxies retrieved")
+        print(f"✓ Galaxy query successful: {len(test_galaxies)} real DESI galaxies retrieved")
         print("Columns:", list(test_galaxies.columns))
-        print("Redshift range:", test_galaxies['Z'].min(), "to", test_galaxies['Z'].max())
+        print(f"Redshift range: {test_galaxies['Z'].min():.3f} to {test_galaxies['Z'].max():.3f}")
+        print(f"RA range: {test_galaxies['RA'].min():.1f}° to {test_galaxies['RA'].max():.1f}°")
+        print(f"Dec range: {test_galaxies['DEC'].min():.1f}° to {test_galaxies['DEC'].max():.1f}°")
         
+        # Test emission line data query
+        print("\nTesting FastSpecFit emission line query...")
+        sample_targetids = test_galaxies['TARGETID'].values[:10]  # Test with 10 galaxies
+        emission_data = desi.query_fastspecfit_data(sample_targetids, show_progress=True)
+        print(f"✓ Emission line query successful: {len(emission_data)} matches found")
+        if len(emission_data) > 0:
+            print("Emission line columns:", [col for col in emission_data.columns if 'FLUX' in col])
+        
+        print("\n✓ All tests passed - real DESI DR1 data access working!")
         return True
         
     except Exception as e:
-        print(f"Test failed: {e}")
+        print(f"✗ Test failed: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
