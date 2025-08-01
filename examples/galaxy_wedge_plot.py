@@ -121,7 +121,12 @@ def create_wedge_plot(galaxies, output_path):
     scatter = ax.scatter(x_proj, y_proj, c=redshift, cmap=cmap, 
                         s=0.5, alpha=0.7, rasterized=True)
     
-    # Set equal aspect ratio for proper wedge shape
+    # Set equal axis ranges with 1:1 aspect ratio
+    x_range = np.max(np.abs(x_proj))
+    y_range = np.max(np.abs(y_proj)) 
+    max_range = max(x_range, y_range)
+    ax.set_xlim(-max_range, max_range)
+    ax.set_ylim(-max_range, max_range)
     ax.set_aspect('equal')
     
     # Styling
