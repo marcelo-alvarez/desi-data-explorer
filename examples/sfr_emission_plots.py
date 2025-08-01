@@ -22,7 +22,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import warnings
-from desi_data_access import DESIDataAccess
+from src.desi_data_access import DESIDataAccess
 
 # Suppress routine warnings for cleaner output
 warnings.filterwarnings('ignore', category=UserWarning)
