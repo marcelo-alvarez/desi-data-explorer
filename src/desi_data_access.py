@@ -102,7 +102,7 @@ class DESIDataAccess:
                       region: str = "NGC",
                       ra_range: Optional[tuple] = None,
                       dec_range: Optional[tuple] = None,
-                      z_range: Optional[tuple] = (0.0, 1.5),
+                      z_range: Optional[tuple] = None,
                       show_progress: bool = True) -> pd.DataFrame:
         """
         Query DESI DR1 galaxies from LSS clustering catalogs.
@@ -120,7 +120,7 @@ class DESIDataAccess:
         dec_range : tuple, optional  
             (min_dec, max_dec) in degrees
         z_range : tuple, optional
-            (min_z, max_z) redshift range
+            (min_z, max_z) redshift range. If None, uses full natural redshift range of the data.
         show_progress : bool
             Show progress information
             
@@ -154,7 +154,7 @@ class DESIDataAccess:
                 mask &= (data['Z'] >= z_range[0]) & (data['Z'] <= z_range[1])
                 if show_progress:
                     print(f"  Redshift: {z_range[0]:.2f} < z < {z_range[1]:.2f}")
-            elif 'Z_not4clus' in data.dtype.names:
+            elif z_range and 'Z_not4clus' in data.dtype.names:
                 z_data = data['Z_not4clus']
                 mask &= (z_data >= z_range[0]) & (z_data <= z_range[1])
                 if show_progress:
