@@ -2,7 +2,34 @@
 
 ## OPEN BUGS
 
-*No open bugs - all critical issues have been resolved*
+### CRITICAL BLOCKING ISSUE - FASTSPECFIT DATA ACCESS PERFORMANCE
+**Priority: CRITICAL - BLOCKS PROJECT COMPLETION**
+**Discovery Date: August 2, 2025**
+**Status: OPEN - BLOCKING DEPLOYMENT**
+
+The FastSpecFit VAC data access is extremely inefficient, requiring download and processing of multi-gigabyte FITS files to extract emission line measurements for even small galaxy samples.
+
+**CRITICAL Issues:**
+- **CONFIRMED**: FastSpecFit VAC files are 1-7 GB each (12+ healpix files total)
+- **CONFIRMED**: Script times out after 4+ minutes attempting to access ~5,000 galaxies
+- **CONFIRMED**: Current approach downloads entire healpix files to find sparse matches
+- **CONFIRMED**: Prevents completion of SFR emission line plots despite corrected code
+- **CONFIRMED**: Violates tutorial time constraints - unusable for live educational sessions
+
+**Performance Problems:**
+- Downloads fastspec-iron-main-dark-nside1-hp01.fits (4.7 GB) for minimal data extraction
+- Downloads fastspec-iron-main-dark-nside1-hp02.fits (7.1 GB) for minimal data extraction  
+- Searches through millions of entries to find thousands of matches
+- No efficient query mechanism for targeted TARGETID retrieval
+
+**Required Solution:**
+- MUST implement efficient FastSpecFit data access method
+- MUST avoid downloading multi-gigabyte files for small samples
+- MUST complete SFR plot generation within reasonable time (< 2 minutes)
+- MUST maintain requirement for authentic DESI DR1 data (no mock data permitted)
+
+**Impact:** BLOCKS repository deployment - cannot complete required SFR emission line plots
+**Code Location:** `src/desi_data_access.py` query_fastspecfit_data() method
 
 ## VERIFIED FIXED
 - **FIXED**: CRITICAL - Artificial Redshift Filtering Corrupts Real Data (FULLY RESOLVED: All artificial filtering eliminated, natural DESI survey boundaries restored, galaxy wedge plot shows authentic multi-tracer data distribution, USER APPROVED all three figures including corrected wedge plot)

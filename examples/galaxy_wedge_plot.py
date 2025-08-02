@@ -171,9 +171,9 @@ def main():
         print("Initializing DESI data access...")
         desi = DESIDataAccess()
         
-        # Query galaxies
-        print("Querying main survey galaxies...")
-        galaxies = desi.query_galaxies(
+        # Query all galaxy tracer types (LRGs, ELGs, QSOs)
+        print("Querying all galaxy tracer types (LRGs, ELGs, QSOs)...")
+        galaxies = desi.query_all_tracers(
             max_galaxies=50000,
             show_progress=True
         )
