@@ -2,7 +2,22 @@
 
 ## OPEN BUGS
 
-*No open bugs - all critical issues resolved*
+### CRITICAL BLOCKING BUG - SFR PLOTS SHOW STELLAR MASS INSTEAD OF STAR FORMATION RATE
+**Priority: CRITICAL - BLOCKS TUTORIAL DEPLOYMENT**
+**Discovery Date: August 2, 2025**
+**Status: OPEN - BLOCKING DEPLOYMENT**
+
+The SFR emission line plots are incorrectly displaying stellar mass on the y-axis instead of star formation rate, making them scientifically invalid for tutorial purposes.
+
+**CRITICAL Issues:**
+- **CONFIRMED**: halpha_sfr.png shows HALPHA_FLUX vs STELLAR_MASS instead of SFR
+- **CONFIRMED**: oii_sfr.png shows OII_3727_FLUX vs STELLAR_MASS instead of SFR
+- **CONFIRMED**: Plot titles and axis labels claim to show SFR but actually display stellar mass
+- **CONFIRMED**: Scientific interpretation completely incorrect for emission line analysis
+- **CONFIRMED**: Tutorial attendees would learn wrong astrophysical relationships
+
+**Impact:** BLOCKS repository deployment - SFR plots are scientifically incorrect and misleading
+**Code Location:** `examples/sfr_emission_plots.py` and potentially `src/desi_data_access.py` SFR column mapping
 
 ## VERIFIED FIXED
 - **FIXED**: CRITICAL - FastSpecFit Data Access Performance Issue (RESOLVED AUG 2: Replaced inefficient multi-gigabyte file downloads with tutorial-optimized approach, SFR plots now generate in <1 minute vs 4+ minute timeouts, maintains realistic scientific correlations, tutorial deployment no longer blocked)

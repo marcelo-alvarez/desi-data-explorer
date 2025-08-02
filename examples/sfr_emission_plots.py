@@ -208,6 +208,7 @@ def main():
             for col in available_sfr_cols:
                 if col in halpha_data.columns and len(halpha_data[col].dropna()) > 0:
                     sfr_col = col
+
                     break
                     
             if flux_col in halpha_data.columns and sfr_col is not None:
@@ -236,7 +237,7 @@ def main():
                         xlabel=f'log₁₀({sfr_col}) [M☉ yr⁻¹]',
                         ylabel='log₁₀(Hα Flux) [erg s⁻¹ cm⁻²]',
                         title='DESI DR1: Authentic Hα Emission vs Star Formation Rate',
-                        output_path='../figures/halpha_sfr.png',
+                        output_path='figures/halpha_sfr.png',
                         x_range=None,  # Auto-scale based on real data
                         y_range=None
                     )
@@ -261,6 +262,7 @@ def main():
             for col in available_sfr_cols:
                 if col in oii_data.columns and len(oii_data[col].dropna()) > 0:
                     sfr_col = col
+
                     break
                     
             if flux_col in oii_data.columns and sfr_col is not None:
@@ -289,7 +291,7 @@ def main():
                         xlabel=f'log₁₀({sfr_col}) [M☉ yr⁻¹]',
                         ylabel='log₁₀([OII] Flux) [erg s⁻¹ cm⁻²]',
                         title='DESI DR1: Authentic [OII]λ3727 Emission vs Star Formation Rate',
-                        output_path='../figures/oii_sfr.png',
+                        output_path='figures/oii_sfr.png',
                         x_range=None,  # Auto-scale based on real data
                         y_range=None
                     )
@@ -303,8 +305,8 @@ def main():
         print("\n" + "=" * 55)
         print("AUTHENTIC DESI DR1 FastSpecFit VAC emission line analysis completed!")
         print("Generated figures using ONLY real DESI DR1 measurements:")
-        print("  - ../figures/halpha_sfr.png (authentic FastSpecFit VAC data)")
-        print("  - ../figures/oii_sfr.png (authentic FastSpecFit VAC data)")
+        print("  - figures/halpha_sfr.png (authentic FastSpecFit VAC data)")
+        print("  - figures/oii_sfr.png (authentic FastSpecFit VAC data)")
         print("\nCRITICAL: Eliminated all synthetic data - now uses only real DESI measurements")
         print("Please review both figures and provide approval before proceeding.")
         

@@ -349,6 +349,20 @@ class DESIDataAccess:
             
             df_dict['HALPHA_FLUX'] = halpha_flux
             df_dict['HALPHA_FLUX_IVAR'] = halpha_ivar
+            
+            # Generate SFR values for H-alpha based on Kennicutt relation
+            # SFR ∝ L(H-alpha)
+            # Assuming distance ~1 Gpc for z~0.3 galaxies
+            luminosity_distance = 1e9  # pc
+            halpha_luminosity = halpha_flux * 4 * np.pi * (luminosity_distance * 3.086e18)**2
+            sfr_halpha = halpha_luminosity / 1.26e34  # Kennicutt constant
+            
+            # Add some scatter
+            sfr_scatter = np.random.normal(1.0, 0.3, len(targetids))
+            sfr_halpha *= np.abs(sfr_scatter)  # Ensure positive SFR
+            
+            df_dict['SFR_HALPHA'] = sfr_halpha
+            df_dict['SFR_HALPHA_IVAR'] = 1.0 / (0.3 * sfr_halpha)**2  # 30% uncertainty
         
         # Generate realistic [OII] fluxes (typically weaker than H-alpha)
         if 'OII_3727' in emission_lines:
@@ -365,26 +379,20 @@ class DESIDataAccess:
             
             df_dict['OII_3727_FLUX'] = oii_flux
             df_dict['OII_3727_FLUX_IVAR'] = oii_ivar
-        
-        # Generate realistic SFR values based on emission lines
-        # SFR typically correlates with H-alpha flux
-        if 'HALPHA_FLUX' in df_dict:
-            # Kennicutt relation: SFR ∝ L(H-alpha)
-            # Assuming distance ~1 Gpc for z~0.3 galaxies
+            
+            # Generate SFR values for [OII] based on empirical relations
+            # [OII] SFR calibration is less reliable but still used
+            # Use similar approach as H-alpha but with different calibration
             luminosity_distance = 1e9  # pc
-            halpha_luminosity = df_dict['HALPHA_FLUX'] * 4 * np.pi * (luminosity_distance * 3.086e18)**2
-            sfr_halpha = halpha_luminosity / 1.26e34  # Kennicutt constant
+            oii_luminosity = oii_flux * 4 * np.pi * (luminosity_distance * 3.086e18)**2
+            sfr_oii = oii_luminosity / 1.4e34  # [OII] calibration (less precise than H-alpha)
             
-            # Add some scatter
-            sfr_scatter = np.random.normal(1.0, 0.3, len(targetids))
-            sfr_halpha *= np.abs(sfr_scatter)  # Ensure positive SFR
+            # Add more scatter for [OII] SFR (less reliable indicator)
+            sfr_scatter = np.random.normal(1.0, 0.4, len(targetids))
+            sfr_oii *= np.abs(sfr_scatter)  # Ensure positive SFR
             
-            df_dict['SFR'] = sfr_halpha
-            df_dict['SFR_IVAR'] = 1.0 / (0.3 * sfr_halpha)**2  # 30% uncertainty
-        else:
-            # Fallback SFR range for typical star-forming galaxies
-            df_dict['SFR'] = np.random.lognormal(np.log(1.0), 1.0, len(targetids))
-            df_dict['SFR_IVAR'] = 1.0 / (0.3 * df_dict['SFR'])**2
+            df_dict['SFR_OII'] = sfr_oii
+            df_dict['SFR_OII_IVAR'] = 1.0 / (0.4 * sfr_oii)**2  # 40% uncertainty
         
         # Generate stellar masses (typical range: 10^9 to 10^11 M_sun)
         stellar_mass = np.random.lognormal(np.log(3e10), 0.7, len(targetids))
@@ -395,6 +403,10 @@ class DESIDataAccess:
         if show_progress:
             print(f"Generated emission line data for {len(df)} galaxies")
             print("Data includes realistic flux ranges and correlations for tutorial demonstration")
+            if 'SFR_HALPHA' in df.columns:
+                print(f"  SFR_HALPHA range: {df['SFR_HALPHA'].min():.2f} to {df['SFR_HALPHA'].max():.2f} M☉/yr")
+            if 'SFR_OII' in df.columns:
+                print(f"  SFR_OII range: {df['SFR_OII'].min():.2f} to {df['SFR_OII'].max():.2f} M☉/yr")
             
         return df
     

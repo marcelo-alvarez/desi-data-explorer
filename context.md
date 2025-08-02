@@ -4,7 +4,7 @@
 Creating a tutorial demonstration repository for accessing and visualizing DESI DR1 galaxy data. Target audience: professional astronomers and students at a live tutorial session.
 
 ## Current Status  
-- **Phase**: RESOLVED - FastSpecFit performance issue solved, tutorial deployment ready
+- **Phase**: BLOCKED - CRITICAL BUG: SFR plots incorrectly show stellar mass instead of star formation rate
 - **Repository**: Git repository properly maintained with latest performance fixes (commit: 3db5713)
 - **Environment**: Python environment fully functional with all dependencies installed via uv (VERIFIED AUG 2: all imports successful)
 - **Project Files**: Complete src/ package structure with optimized FastSpecFit implementation (VERIFIED AUG 2: SFR plots generate in <1 minute)
