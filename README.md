@@ -1,201 +1,183 @@
 # DESI Data Explorer
 
-A demonstration repository showcasing real-time development of DESI Data Release 1 (DR1) data visualization tools using Claude Code. This project was developed live during a Claude Code tutorial session to demonstrate AI-assisted astronomical software development.
+A demonstration repository created during a Claude Code tutorial session, showing how to access and visualize DESI Data Release 1 (DR1) galaxy data.
 
-## Project Background
+## Overview
 
-This repository was created during a live Claude Code development session to demonstrate:
-- Real-time AI-assisted coding for astronomical data analysis
-- Best practices for accessing and visualizing DESI DR1 galaxy data
-- Professional software development workflows in astronomy
-- Integration of authentic survey data into educational tools
+This repository contains Python scripts that demonstrate basic visualization techniques for DESI DR1 galaxy data. The code was developed during a live tutorial to showcase AI-assisted development workflows and serves as an example of working with astronomical survey data.
 
-The entire development process, from initial setup to final figures, was completed within a single Claude Code session, showcasing the efficiency of AI-assisted development for astronomical research tools.
+## Development Process
+
+### Planning Phase (Claude Desktop)
+
+Before the live tutorial, a planning session was conducted using Claude Desktop to create the foundational project documents:
+
+- **CLAUDE.md**: Project guidelines establishing key objectives, technical requirements, and constraints
+- **tasks.md**: Detailed development checklist breaking down the work into phases
+- **context.md**: Initial session context to maintain continuity between development sessions
+
+Key planning decisions included:
+- Using real DESI DR1 data via NERSC HTTPS or NOIRLab TAP services
+- Creating two example scripts (galaxy wedge plot and emission line analysis)
+- Generating three figures requiring user approval
+- Targeting a 45-minute development session
+
+### Development Phase (Claude Code)
+
+The actual development used Claude Code with a structured `/run-dev-cycle` workflow consisting of:
+
+1. **Start Session**: Load project context and establish baseline
+2. **Audit Context**: Verify previous claims and update documentation
+3. **Continue Work**: Execute development tasks
+4. **Save Context**: Document believed accomplishments
+5. **Final Audit**: Verify work and update status
+
+This workflow used "BELIEVED COMPLETED" notation to distinguish between attempted work and verified accomplishments, creating clear handoffs between development cycles.
+
+### Tutorial Timeline
+
+- **Planning Session**: Created project structure and documentation templates
+- **Live Tutorial**: 60 minutes with audience (basic setup and initial attempts)
+- **Follow-up Development**: ~90 additional minutes to complete all objectives
+- **Total Time**: ~2.5 hours from planning to final working code
 
 ## Features
 
-- **Real DESI DR1 Data Access**: Direct downloads from DESI LSS clustering catalogs
-- **Galaxy Wedge Visualization**: 2D orthographic projection of ~50,000 galaxies with redshift coloring
-- **Emission Line Analysis**: Star formation rate correlations with Halpha and [OII]λ3727 luminosities
-- **Educational Focus**: Clear documentation and modular code structure for tutorial use
-- **macOS Optimized**: Tested on M1/M2 MacBook Air systems
+The repository includes two example scripts:
 
-## Quick Start
+1. **Galaxy Wedge Visualization**: A 2D projection showing the spatial distribution of ~50,000 galaxies
+2. **Emission Line Analysis**: Scatter plots comparing emission line fluxes with star formation rates
 
-### Prerequisites
+## Requirements
 
-- Python 3.9+
-- `uv` package manager (recommended) or `poetry`
-- Internet connection for DESI data downloads
-- ~5GB free disk space for data caching
+- Python 3.9 or higher
+- Scientific Python packages (see pyproject.toml)
+- Internet connection for data downloads
+- Approximately 5GB free disk space
 
-### Installation
+## Installation
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/marcelo-alvarez/desi-data-explorer.git
-   cd desi-data-explorer
-   ```
+Clone the repository and install dependencies using uv:
 
-2. **Install dependencies with uv:**
-   ```bash
-   uv sync
-   ```
+```bash
+git clone https://github.com/marcelo-alvarez/desi-data-explorer.git
+cd desi-data-explorer
+uv sync
+```
 
-   Or with poetry:
-   ```bash
-   poetry install
-   ```
+Or using poetry:
 
-### Running the Examples
+```bash
+poetry install
+```
 
-#### Galaxy Wedge Visualization
+## Usage
+
+### Galaxy Wedge Plot
+
 ```bash
 uv run python examples/galaxy_wedge_plot.py
 ```
-Generates: `figures/galaxy_wedge.png` - A 2D wedge plot showing spatial distribution of DESI galaxies
 
-#### Emission Line Analysis
+This script:
+- Downloads DESI LSS clustering catalogs (~200MB)
+- Loads data for LRG, ELG, and QSO galaxy types
+- Creates a 2D wedge projection colored by redshift
+- Saves the output to `figures/galaxy_wedge.png`
+
+### Emission Line Analysis
+
 ```bash
-uv run python examples/sfr_emission_plots.py  
+uv run python examples/sfr_emission_plots.py
 ```
-Generates: 
-- `figures/halpha_sfr.png` - Halpha luminosity vs star formation rate
-- `figures/oii_sfr.png` - [OII]λ3727 luminosity vs star formation rate
 
-## Data Sources
+This script:
+- Uses galaxy data from DESI catalogs
+- Generates emission line flux measurements
+- Creates scatter plots for Hα and [OII] versus star formation rate
+- Saves outputs to `figures/halpha_sfr.png` and `figures/oii_sfr.png`
 
-This project uses publicly available DESI DR1 data:
-
-- **LSS Clustering Catalogs**: https://data.desi.lbl.gov/public/dr1/survey/catalogs/dr1/LSS/iron/LSScats/v1.5/
-- **FastSpecFit VAC**: Pre-computed emission line measurements and star formation rates
-- **Galaxy Selection**: Main survey galaxies with `SPECTYPE='GALAXY'` and `ZWARN=0`
-
-## Repository Structure
+## Project Structure
 
 ```
 desi-data-explorer/
 ├── README.md                    # This file
-├── pyproject.toml              # Project dependencies  
-├── src/                        # Reusable library code
-│   ├── __init__.py            # Package initialization
-│   └── desi_data_access.py    # DESI data access utilities
-├── examples/                   # Tutorial example scripts
-│   ├── galaxy_wedge_plot.py   # 2D galaxy distribution visualization
-│   └── sfr_emission_plots.py  # Emission line vs SFR analysis
-└── figures/                    # Generated visualization outputs
-    ├── galaxy_wedge.png       # Galaxy wedge plot
-    ├── halpha_sfr.png         # Halpha-SFR correlation
-    └── oii_sfr.png            # OII-SFR correlation
+├── pyproject.toml              # Python dependencies
+├── CLAUDE.md                   # Project guidelines from planning phase
+├── tasks.md                    # Development checklist
+├── context.md                  # Session context tracking
+├── bugs.md                     # Issue tracking
+├── src/
+│   ├── __init__.py
+│   └── desi_data_access.py    # Data access utilities
+├── examples/
+│   ├── galaxy_wedge_plot.py   # Wedge visualization script
+│   └── sfr_emission_plots.py  # Emission line analysis
+└── figures/                    # Output directory for plots
 ```
 
-## API Documentation
+## Data Access Notes
 
-### DESIDataAccess Class
+The project uses DESI DR1 public data from:
+- LSS clustering catalogs: `https://data.desi.lbl.gov/public/dr1/survey/catalogs/dr1/LSS/`
+- File sizes range from 100-500MB per catalog
 
-The core data access functionality is provided by the `DESIDataAccess` class:
+First runs will take several minutes to download data. Subsequent runs use cached files from `/tmp/`.
 
-```python
-from src.desi_data_access import DESIDataAccess
+## Performance Considerations
 
-# Initialize data access
-desi = DESIDataAccess()
+- Initial data download: 2-5 minutes depending on connection speed
+- Galaxy query and loading: ~30 seconds for 50,000 objects
+- Plot generation: ~10-20 seconds per figure
 
-# Download LSS clustering catalog 
-filename = desi.download_lss_file(tracer_type="ELG_LOPnotqso", region="NGC")
+For tutorial or demonstration purposes, consider pre-downloading data files to avoid wait times during live sessions.
 
-# Load galaxy data
-galaxies = desi.load_galaxy_data(filename, max_galaxies=50000)
-```
+## Known Limitations
 
-#### Key Methods
+1. **Data Downloads**: Large file sizes can cause delays in live demonstrations
+2. **Emission Line Data**: Uses synthetic measurements for tutorial efficiency
+3. **Platform Testing**: Primarily tested on macOS; other platforms may require adjustments
 
-- `download_lss_file(tracer_type, region)`: Download DESI LSS clustering catalog
-- `load_galaxy_data(filename, max_galaxies)`: Load galaxy coordinates and redshifts
-- `get_emission_line_data(galaxies, line_type)`: Generate emission line measurements
+## Tutorial Lessons
 
-## Technical Details
+This project demonstrates several aspects of AI-assisted scientific software development:
 
-### Galaxy Wedge Projection
+### Technical Lessons
+- Working with large astronomical datasets
+- Creating scientific visualizations with matplotlib
+- Organizing code for reusability
+- Managing dependencies with modern Python tools
 
-The wedge visualization uses an orthographic projection optimized to minimize angular spread:
+### Process Lessons
+- The importance of realistic time estimates for data-intensive projects
+- The value of structured development workflows (audit cycles)
+- The difference between live demonstration needs and actual development
+- How AI coding assistants handle iterative debugging and recovery
 
-- **Coordinate System**: Redshift × angular coordinates (not distance units)
-- **Projection Center**: Calculated to minimize galaxy scatter
-- **Color Coding**: Redshift-based coloring (z ∈ [0.8, 1.5] for ELG sample)
+The development process illustrated common challenges in working with real survey data, including download performance, data format complexity, and the need for quality filtering.
 
-### Emission Line Analysis
+## Development Workflow Documentation
 
-Star formation rate correlations use realistic astrophysical relationships:
+The `/run-dev-cycle` slash-command workflow used in this project provides a structured approach to AI-assisted development:
 
-- **Halpha Calibration**: L(Halpha) ∝ SFR^1.1 (Kennicutt 1998)
-- **[OII] Calibration**: L([OII]) ∝ SFR^0.9 with metallicity dependence
-- **Sample Selection**: 5,000 galaxies per plot with FLUX_IVAR > 0
+- Separates work attempts from verified outcomes
+- Creates audit trails for debugging
+- Maintains context between sessions
+- Enables systematic error detection and correction
 
-## Performance Notes
-
-- **First Run**: ~2-3 minutes (includes 196MB data download)
-- **Subsequent Runs**: ~30 seconds (uses cached data)
-- **Memory Usage**: ~1GB peak for 50,000 galaxies
-- **Network Requirements**: HTTPS access to data.desi.lbl.gov
-
-## Troubleshooting
-
-### Import Errors
-If you encounter import errors, ensure you're using the correct Python environment:
-```bash
-uv run python -c "from src.desi_data_access import DESIDataAccess; print('Success!')"
-```
-
-### Network Issues
-DESI data downloads require reliable internet. If downloads fail:
-1. Check connectivity to https://data.desi.lbl.gov
-2. Verify ~200MB free disk space
-3. Retry after a few minutes (servers may be busy)
-
-### Memory Issues
-For large galaxy samples (>100k), consider:
-- Reducing `max_galaxies` parameter
-- Running on systems with >4GB RAM
-- Closing other applications during execution
-
-## Educational Use
-
-This repository serves as:
-- **Claude Code Demonstration**: Example of AI-assisted astronomical software development
-- **DESI Data Tutorial**: Practical guide to accessing real survey data
-- **Development Workflow Example**: Professional coding practices in astronomy
-- **Research Code Template**: Starting point for DESI DR1 analysis projects
-
-## Development History
-
-This project was developed live during a Claude Code tutorial session, demonstrating:
-1. Initial repository setup and environment configuration
-2. Real-time implementation of DESI data access methods
-3. Iterative development of scientific visualizations
-4. Bug resolution and code optimization with AI assistance
-5. Professional documentation and code organization
-
-The development process showcased how Claude Code can accelerate astronomical software development while maintaining scientific rigor and professional coding standards.
+This workflow proved particularly valuable when dealing with the complexity of astronomical data access and the need to maintain scientific accuracy throughout the development process.
 
 ## Citation
 
-When using this code in publications or presentations, please cite:
-- DESI Data Release 1 (Collaboration et al. 2024)
+If you use this code for educational purposes, please acknowledge:
+
+- DESI Collaboration et al. (2024) for the Data Release 1
 - This repository: https://github.com/marcelo-alvarez/desi-data-explorer
 
 ## License
 
 MIT License - see LICENSE file for details.
 
-## Support
+## Acknowledgments
 
-For questions about this tutorial code:
-- Open an issue on GitHub
-- Contact the tutorial organizers
-- Consult DESI DR1 documentation
-
-For DESI data questions:
-- Visit https://www.desi.lbl.gov/
-- Check DESI DR1 documentation
-- Contact desi-data@desi.lbl.gov
+Created as part of a Claude Code tutorial demonstration, with planning conducted in Claude Desktop. The visualizations use publicly available data from the Dark Energy Spectroscopic Instrument (DESI) Data Release 1.
