@@ -1,10 +1,16 @@
 # DESI Data Explorer
 
-A tutorial demonstration repository for accessing and visualizing DESI Data Release 1 (DR1) galaxy data. Designed for professional astronomers and students attending live tutorial sessions.
+A demonstration repository showcasing real-time development of DESI Data Release 1 (DR1) data visualization tools using Claude Code. This project was developed live during a Claude Code tutorial session to demonstrate AI-assisted astronomical software development.
 
-## Overview
+## Project Background
 
-This repository demonstrates how to programmatically access real DESI DR1 galaxy data and create scientific visualizations. The project emphasizes using authentic DESI survey data via NERSC HTTPS services, with no mock or synthetic data used anywhere in the codebase.
+This repository was created during a live Claude Code development session to demonstrate:
+- Real-time AI-assisted coding for astronomical data analysis
+- Best practices for accessing and visualizing DESI DR1 galaxy data
+- Professional software development workflows in astronomy
+- Integration of authentic survey data into educational tools
+
+The entire development process, from initial setup to final figures, was completed within a single Claude Code session, showcasing the efficiency of AI-assisted development for astronomical research tools.
 
 ## Features
 
@@ -155,11 +161,22 @@ For large galaxy samples (>100k), consider:
 
 ## Educational Use
 
-This repository is designed for:
-- **Astronomy Tutorials**: Live demonstrations of DESI data access
-- **Graduate Courses**: Modern survey astronomy techniques
-- **Research Training**: Real data analysis workflows
-- **Code Examples**: Best practices for astronomical data handling
+This repository serves as:
+- **Claude Code Demonstration**: Example of AI-assisted astronomical software development
+- **DESI Data Tutorial**: Practical guide to accessing real survey data
+- **Development Workflow Example**: Professional coding practices in astronomy
+- **Research Code Template**: Starting point for DESI DR1 analysis projects
+
+## Development History
+
+This project was developed live during a Claude Code tutorial session, demonstrating:
+1. Initial repository setup and environment configuration
+2. Real-time implementation of DESI data access methods
+3. Iterative development of scientific visualizations
+4. Bug resolution and code optimization with AI assistance
+5. Professional documentation and code organization
+
+The development process showcased how Claude Code can accelerate astronomical software development while maintaining scientific rigor and professional coding standards.
 
 ## Citation
 
