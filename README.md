@@ -1,10 +1,10 @@
 # DESI Data Explorer
 
-A demonstration repository created during a Claude Code tutorial session, showing how to access and visualize DESI Data Release 1 (DR1) galaxy data.
+A demonstration repository created during a Claude Code tutorial session at KIPAC (July 30, 2025), showing how to access and visualize DESI Data Release 1 (DR1) galaxy data.
 
 ## Overview
 
-This repository contains Python scripts that demonstrate basic visualization techniques for DESI DR1 galaxy data. The code was developed during a live tutorial to showcase AI-assisted development workflows and serves as an example of working with astronomical survey data.
+This repository contains Python scripts that demonstrate basic visualization techniques for DESI DR1 galaxy data. The code was developed during a live tutorial at KIPAC to showcase AI-assisted development workflows and serves as an example of working with astronomical survey data.
 
 ## Development Process
 
@@ -32,13 +32,15 @@ The actual development used Claude Code with a structured `/run-dev-cycle` workf
 4. **Save Context**: Document believed accomplishments
 5. **Final Audit**: Verify work and update status
 
-This workflow used "BELIEVED COMPLETED" notation to distinguish between attempted work and verified accomplishments, creating clear handoffs between development cycles.
 
 ### Tutorial Timeline
 
 - **Planning Session**: Created project structure and documentation templates
-- **Live Tutorial**: 60 minutes with audience (basic setup and initial attempts)
-- **Follow-up Development**: ~90 additional minutes to complete all objectives
+- **Live Tutorial at KIPAC**: July 30, 2025, 2:30-3:30pm (60 minutes with audience)
+  - All commits up to [`03365c8`](https://github.com/marcelo-alvarez/desi-data-explorer/commit/03365c86e52d2cb5d0b84be1d5bea5382aff2e4f) were made live during this session
+  - Achieved basic setup and initial visualization attempts
+- **Follow-up Development**: ~90 additional minutes using Claude Code (post-tutorial)
+  - All commits after [`03365c8`](https://github.com/marcelo-alvarez/desi-data-explorer/commit/03365c86e52d2cb5d0b84be1d5bea5382aff2e4f) completed the objectives and resolved remaining issues
 - **Total Time**: ~2.5 hours from planning to final working code
 
 ## Features
@@ -166,6 +168,9 @@ The `/run-dev-cycle` slash-command workflow used in this project provides a stru
 - Enables systematic error detection and correction
 
 This workflow proved particularly valuable when dealing with the complexity of astronomical data access and the need to maintain scientific accuracy throughout the development process.
+
+The specific slash-commands implementation used in this project can be found at:
+https://github.com/marcelo-alvarez/claude-commands (commit [`4c53283`](https://github.com/marcelo-alvarez/claude-commands/commit/4c53283a291d6877da8222d0866088469ff35406))
 
 ## Citation
 
